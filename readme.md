@@ -1,4 +1,4 @@
-#UUI Solar Data
+# UUI Solar Data
 
 This project will enable data collection, aggregation, reporting & alerting, 
 and visualization for the energy output of all solar arrays installed on
