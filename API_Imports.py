@@ -8,6 +8,13 @@ Created on Tue May  1 21:01:25 2018
 import urllib
 import contextlib
 import json
+import requests
+
+
+#
+#Enphase logo must be displayed above enphase data 
+#
+
 
 #imports API key and user ID
 with open('config.txt', 'r') as file:
@@ -17,4 +24,8 @@ with open('config.txt', 'r') as file:
 #Imports User info and Prints for debugging
 URL = ('https://api.enphaseenergy.com/api/v2/systems?key=' + API + '&user_id=' + User)
 with contextlib.closing(urllib.request.urlopen(URL)) as enlighten:
-    print(json.loads(enlighten.read()))
+    jsonarry = json.loads(enlighten.read())
+    
+    print(jsonarry)
+
+#Summary = ('https://api.enphaseenergy.com/api/v2/systems/' + jsonarr + '/consumption_stats')
