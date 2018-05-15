@@ -30,15 +30,22 @@ def get_sunnyportal(dt=None):
 
     # compose the url
     dt = datetime.datetime.now() if dt is None else dt
-    url = '{}/ExportTemp/Energy_and_Power_Day_{}.csv'.format(base_url, dt.date())
+    url = 'https://www.sunnyportal.com/Templates/PublicChartValues.aspx'
 
     # perform the query
-    # THIS RETURNS DATA from the wrong system
     with requests.Session() as s:
         s.auth = (user_id, pwd)
-        s.cookies['plantOid'] = 'e8e3ad79-b324-4f8f-8e10-d82bf7bf9200'
-        s.cookies['systemId'] = 'f7b43180-df79-11d4-d77e-00015d8e3UUI'
-        r = s.get(url)
+        params = {
+            'ID': 'c570606c-374e-474d-ac75-bb7759c00845',
+            'endTime': '{} 11:59:59 PM'.format(dt.date()),
+            'splang': 'en - US',
+            'plantTimezoneBias': '-240',
+            'name': 'Day {}'.format(dt.date())
+        }
+
+        r = s.get(url, params=params)
+        # NOTE the response content at this point is still in html .. needs translation to a dataframe.
+        # Ensure that the string 'UUI String Inverter Solar' is somewhere in the response.
         print r.content
     pass
 
@@ -57,8 +64,8 @@ def get_summary(api_base, param):
 
 
 def main():
-
-    get_sunnyportal()
+    some_date = datetime.datetime.strptime('May 13 2018', '%b %d %Y')
+    get_sunnyportal(some_date)
 
     param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
