@@ -59,3 +59,14 @@ energy = get_energy(api_base, param)
 
 pp.pprint(details)
 pp.pprint(energy)
+
+def sunnyhell(param)
+
+
+
+
+
+
+
+params = {}
+sunnyhell(params)
