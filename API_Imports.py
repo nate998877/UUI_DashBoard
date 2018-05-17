@@ -24,7 +24,7 @@ def get_sunnyportal(dt=None):
     :param dt: A datetime object containing the desired date. If not specified (None), it will use today's date.
     :return:
     """
-    base_url = 'https://www.sunnyportal.com'
+    base_url = 'https://www.sunnyportal.com/Templates/PublicChartValues.aspx?ID=00000000-0000-0000-0000-000000000000&endTime=5/15/2018%2011:59:59%20PM&splang=en-US&plantTimezoneBias=-240&name=Day%202018-05-15'
     user_id = os.getenv('SUNNYPORTAL_USER_ID')
     pwd = os.getenv('SUNNYPORTAL_PWD')
 
@@ -39,7 +39,7 @@ def get_sunnyportal(dt=None):
         s.cookies['plantOid'] = 'e8e3ad79-b324-4f8f-8e10-d82bf7bf9200'
         s.cookies['systemId'] = 'f7b43180-df79-11d4-d77e-00015d8e3UUI'
         r = s.get(url)
-        print r.content
+        print(r.content)
     pass
 
 
@@ -83,9 +83,11 @@ def main():
 
     details = get_details(api_base, param)
     energy = get_energy(api_base, param)
-
+    pp.pprint('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ \n')
     pp.pprint(details)
+    pp.pprint('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ \n')
     pp.pprint(energy)
+
 
 if __name__ == '__main__':
     main()
