@@ -1,1 +1,4 @@
 requests
+pandas
+lxml
+html5lib
