@@ -49,13 +49,7 @@ def get_sunnyportal(dt=None):
     :param dt: A datetime object containing the desired date. If not specified (None), it will use today's date.
     :return: A dataframe containing time series hourly values of Mean Solar Power (KWh), with UTC time index
     """
-<<<<<<< HEAD
-<<<<<<< HEAD
     base_url = 'https://www.sunnyportal.com/Templates/PublicChartValues.aspx?ID=00000000-0000-0000-0000-000000000000&endTime=5/15/2018%2011:59:59%20PM&splang=en-US&plantTimezoneBias=-240&name=Day%202018-05-15'
-=======
->>>>>>> d9400b23dd558456a75b9b4996c7228a0125f033
-=======
->>>>>>> d9400b23dd558456a75b9b4996c7228a0125f033
     user_id = os.getenv('SUNNYPORTAL_USER_ID')
     pwd = os.getenv('SUNNYPORTAL_PWD')
     url = 'https://www.sunnyportal.com/Templates/PublicChartValues.aspx'
@@ -65,8 +59,6 @@ def get_sunnyportal(dt=None):
     r = None
     with requests.Session() as s:
         s.auth = (user_id, pwd)
-<<<<<<< HEAD
-<<<<<<< HEAD
         s.cookies['plantOid'] = 'e8e3ad79-b324-4f8f-8e10-d82bf7bf9200'
         s.cookies['systemId'] = 'f7b43180-df79-11d4-d77e-00015d8e3UUI'
         r = s.get(url)
@@ -74,17 +66,14 @@ def get_sunnyportal(dt=None):
     pass
 
 
-=======
-=======
->>>>>>> d9400b23dd558456a75b9b4996c7228a0125f033
-        params = {
-            'ID': 'c570606c-374e-474d-ac75-bb7759c00845',
-            'endTime': '{} 11:59:59 PM'.format(dt.date()),
-            'splang': 'en - US',
-            'plantTimezoneBias': '-240',  # Use 0 for UTC,  Use -240 for local Indianapolis offset THIS DOES NOT WORK
-            'name': 'Day {}'.format(dt.date())
-        }
-        r = s.get(url, params=params)
+    params = {
+        'ID': 'c570606c-374e-474d-ac75-bb7759c00845',
+        'endTime': '{} 11:59:59 PM'.format(dt.date()),
+        'splang': 'en - US',
+        'plantTimezoneBias': '-240',  # Use 0 for UTC,  Use -240 for local Indianapolis offset THIS DOES NOT WORK
+        'name': 'Day {}'.format(dt.date())
+    }
+    r = s.get(url, params=params)
 
     # parse the returned html into pandas dataframe
     if r is not None:
@@ -106,11 +95,6 @@ def get_sunnyportal(dt=None):
         # NOTE that Mean Power still contains NaN values
         return df
 
-#
-<<<<<<< HEAD
->>>>>>> d9400b23dd558456a75b9b4996c7228a0125f033
-=======
->>>>>>> d9400b23dd558456a75b9b4996c7228a0125f033
 #Method calls Enphase's (Cottage Rooftop) Array and returns a summary of the system
 def get_summary(api_base, param):
     resp = requests.get(api_base , params=param)
