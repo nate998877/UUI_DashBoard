@@ -6,15 +6,12 @@ Created on Tue May  1 21:01:25 2018
 
 
 import os
-import pytz
 #import dash
 #import dash_core_components as dcc
 #import dash_html_components as html
-import requests
 import pprint
 import datetime
 import calendar
-import pandas as pd
 import time
 import importer as impt
 
@@ -36,6 +33,7 @@ def print_enphaseenergy():
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
     resp = impt.get_enphase(api_base, param)
     pp.pprint(dict(resp))
+
 
 def print_solaredgesiteinfo(date=datetime.date.today()):
     print("SOLAREDGE --------------------------")
@@ -63,9 +61,12 @@ def print_sunnyportal():
 
 
 def main():
-    #print_enphase()
-    #print_solaredge()
-    #print_sunnyportal()
+    # Testing the api calls
+    print_enphase()
+    print_solaredge()
+    print_sunnyportal()
+
+    # select a time window
     now = time.time()
     today = calendar.timegm(datetime.date.today())
     print(now)
