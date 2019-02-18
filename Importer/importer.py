@@ -8,7 +8,17 @@ import requests
 import datetime
 import pandas as pd
 import pytz
-import calendar
+import time
+import enphaseDB
+
+def dbcalls(enphase):
+    path = "enphase.db"
+    conn = enphaseDB.initalize(path)
+    c = conn.cursor()
+    enphaseDB.add(c, [10,10,10])
+    enphaseDB.call(c)
+    conn.commit()
+    conn.close()
 
 
 def convert_sunnyp_to_datetime(dt, sunnyp_date_str):
@@ -82,13 +92,12 @@ def get_sunnyportal(dt=None):
 # Methods call SolarEgde's (Ground) Array and returns API call depending on Method used
 def get_SEdetails(api_base, param):
     resp = requests.get(api_base + '/details', params=param)
-    resp.raise_for_status()
     return dict(resp.json())
 
 
 # Methods call SolarEgde's (Ground) Array and returns API call depending on Method used
 def get_SEenergy(api_base, param,dt=None):
-    dt = datetime.datetime.now() if dt is None else dt
+    #dt = datetime.datetime.now() if dt is None else dt
     resp = requests.get(api_base + '/energy', params=param)
     resp = dict(resp.json())
     resp = resp.get('energy', {}).get('values')
@@ -111,5 +120,9 @@ def get_enphaseenergy(api_base, param):
     resp = requests.get(api_base, params=param)
     d = dict(resp.json())
     system_id = d['systems'][1]['system_id']
-    resp = requests.get('{0}/{1}/summary'.format(api_base, system_id), params=param)
+    endt = time.time()
+    startt = datetime.date.today()
+    startt = time.mktime(startt.timetuple())
+    param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID'), 'start_at': 0, 'end_at': endt}
+    resp = requests.get('{0}/{1}/rgm_stats'.format(api_base, system_id), params=param)
     return dict(resp.json())

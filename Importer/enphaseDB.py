@@ -14,9 +14,9 @@ def get_enphase(api_base, param):
 def initalize(db_path):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    c.execute("""CREATE DATABASE IF NOT EXISTS enphase""")
+#    c.execute("""CREATE DATABASE IF NOT EXISTS enphase""")
     c.execute("""CREATE TABLE IF NOT EXISTS historicPower (date, time, power)""")
-    return c;
+    return conn;
 
 
 def add(c, values):
@@ -26,4 +26,7 @@ def add(c, values):
 
 def call(c):
     print(c)
-    print(c.execute("""SELECT * FROM *"""))
+    c.execute("""SELECT * FROM historicPower""")
+    rows = c.fetchall()
+    for row in rows:
+        print(row)

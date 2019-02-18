@@ -6,13 +6,8 @@ Created on Tue May  1 21:01:25 2018
 
 
 import os
-#import dash
-#import dash_core_components as dcc
-#import dash_html_components as html
 import pprint
 import datetime
-import calendar
-import time
 import importer as impt
 
 
@@ -24,14 +19,15 @@ def print_enphase():
     param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
     resp = impt.get_enphase(api_base, param)
+    impt.dbcalls(resp)
     pp.pprint(dict(resp))
 
 
 def print_enphaseenergy():
-
+    print("ENPHASE --------------------------")
     param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
-    resp = impt.get_enphase(api_base, param)
+    resp = impt.get_enphaseenergy(api_base, param)
     pp.pprint(dict(resp))
 
 
@@ -46,6 +42,7 @@ def print_solaredgesiteinfo(date=datetime.date.today()):
 
 
 def print_solaredge(date=datetime.date.today()):
+    print("SUNNYEDGE --------------------------")
     site_id = os.getenv('SOLAREDGE_USER_ID')
     api_base = 'https://monitoringapi.solaredge.com/site/{}'.format(site_id)
     # Defaults to today
@@ -60,18 +57,11 @@ def print_sunnyportal():
     print(resp)
 
 
+# methods currently only return values from today
 def main():
-    # Testing the api calls
     print_enphase()
-    print_solaredge()
-    print_sunnyportal()
-
-    # select a time window
-    now = time.time()
-    today = calendar.timegm(datetime.date.today())
-    print(now)
-    print(today)
-
+    #print_solaredge()
+    #print_sunnyportal()
 
 if __name__ == '__main__':
     main()
