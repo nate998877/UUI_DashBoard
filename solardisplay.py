@@ -8,6 +8,7 @@ Created on Tue May  1 21:01:25 2018
 import os
 import pprint
 import datetime
+import schedule
 import importer as impt
 
 
@@ -19,16 +20,8 @@ def print_enphase():
     param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
     resp = impt.get_enphase(api_base, param)
-    impt.dbcalls(resp)
-    pp.pprint(dict(resp))
-
-
-def print_enphaseenergy():
-    print("ENPHASE --------------------------")
-    param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
-    api_base = 'https://api.enphaseenergy.com/api/v2/systems'
-    resp = impt.get_enphaseenergy(api_base, param)
-    pp.pprint(dict(resp))
+    pp.pprint(resp)
+    return resp
 
 
 def print_solaredgesiteinfo(date=datetime.date.today()):
@@ -59,9 +52,12 @@ def print_sunnyportal():
 
 # methods currently only return values from today
 def main():
-    print_enphase()
-    #print_solaredge()
+    print_solaredge()
     #print_sunnyportal()
+    response = print_enphase()
+    impt.enphase(response)
+    #schedule.every().hour.do(impt.database_updater(response))
+
 
 if __name__ == '__main__':
     main()

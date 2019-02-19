@@ -1,32 +1,49 @@
 import requests
 import sqlite3
-import os
-
-# Method calls Enphase's (Cottage Rooftop) Array and returns a summary of the system
-def get_enphase(api_base, param):
-    resp = requests.get(api_base, params=param)
-    d = dict(resp.json())
-    system_id = d['systems'][1]['system_id']
-    resp = requests.get('{0}/{1}/summary'.format(api_base, system_id), params=param)
-    return dict(resp.json())
+import datetime
+import pytz
 
 
-def initalize(db_path):
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-#    c.execute("""CREATE DATABASE IF NOT EXISTS enphase""")
-    c.execute("""CREATE TABLE IF NOT EXISTS historicPower (date, time, power)""")
-    return conn;
+class Enphase:
+    def __init__(self):
+        self.databasepath = "enphase.db"
+        self.connection = sqlite3.connect(self.databasepath)
+        self.cursor = self.connection.cursor()
+
+    def create_database(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS historicPower (datetime, power)""")
+
+    def insert_database(self, values):
+        self.cursor.execute("""INSERT INTO historicPower (datetime, power) values(?, ?)""", (str(values[0]), str(values[1])))
+
+    def call_database(self, dt):
+        self.cursor.execute("""SELECT * FROM historicPower ORDER BY ? DESC LIMIT 1;""", dt)
+        rows = self.cursor.fetchall()
+        return rows
+
+#if database is empty causes error. DB needs to be initialized w/ data before it's called
+    def call_last(self):
+        self.cursor.execute("""SELECT * FROM historicPower ORDER BY power DESC LIMIT 1;""")
+        return self.cursor.fetchone()[0]
+
+    def printout(self):
+        self.cursor.execute("""SELECT * FROM historicPower""")
+        rows = self.cursor.fetchall()
+        for row in rows:
+            print(row)
+
+    def tohour(self, power):
+        if power != self.call_last():
+            hourpower = power - self.call_last()
+            return hourpower
+        else:
+            return 100
 
 
-def add(c, values):
-    insert = """INSERT INTO historicPower (date, time, power) values({0}, {1}, {2})"""
-    c.execute(insert.format(values[0], values[1], values[2]))
-
-
-def call(c):
-    print(c)
-    c.execute("""SELECT * FROM historicPower""")
-    rows = c.fetchall()
-    for row in rows:
-        print(row)
+def getvalues(resp):
+    values = [0, 0]
+    values[0] = datetime.datetime.utcfromtimestamp(resp.get('last_interval_end_at'))
+    values[0] = values[0].isoformat(' ')
+    values[0] = datetime.datetime.strptime(str(values[0]), '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('EST'))
+    values[1] = resp.get('energy_lifetime')
+    return values

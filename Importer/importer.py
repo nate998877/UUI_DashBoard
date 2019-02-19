@@ -11,15 +11,6 @@ import pytz
 import time
 import enphaseDB
 
-def dbcalls(enphase):
-    path = "enphase.db"
-    conn = enphaseDB.initalize(path)
-    c = conn.cursor()
-    enphaseDB.add(c, [10,10,10])
-    enphaseDB.call(c)
-    conn.commit()
-    conn.close()
-
 
 def convert_sunnyp_to_datetime(dt, sunnyp_date_str):
     """
@@ -116,13 +107,10 @@ def get_enphase(api_base, param):
     return dict(resp.json())
 
 
-def get_enphaseenergy(api_base, param):
-    resp = requests.get(api_base, params=param)
-    d = dict(resp.json())
-    system_id = d['systems'][1]['system_id']
-    endt = time.time()
-    startt = datetime.date.today()
-    startt = time.mktime(startt.timetuple())
-    param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID'), 'start_at': 0, 'end_at': endt}
-    resp = requests.get('{0}/{1}/rgm_stats'.format(api_base, system_id), params=param)
-    return dict(resp.json())
+def enphase(response):
+    database = enphaseDB.Enphase()
+    database.create_database()
+    values = enphaseDB.getvalues(response)
+    values[1] = database.tohour(values[1])
+    database.insert_database(values)
+    database.printout()
