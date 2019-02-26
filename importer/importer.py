@@ -94,6 +94,7 @@ def get_SEenergy(api_base, param, dt=None):
     df = pd.DataFrame.from_dict(resp)
     df.columns = ['DateTimeUTC', 'MeanPower(KWh)']
     df['DateTimeUTC'] = df['DateTimeUTC'].map(lambda x: x + "+00:00")
+    df['MeanPower(KWh)'] = df['MeanPower(KWh)'].map(lambda x: x / 1000)
     return df
 
 
@@ -106,12 +107,24 @@ def get_enphase(api_base, param):
     return dict(resp.json())
 
 
+#values are datetime and generation
 def enphase(response):
     database = enphaseDB.Enphase()
     database.create_database()
     values = enphaseDB.getvalues(response)
+
     try:
         values[1] = database.tohour(values[1])
     except TypeError:
         database.insert_database(values)
+    df = db_to_df(database)
     database.printout()
+
+
+def db_to_df(db):
+    df = pd.read_sql_query("SELECT * FROM historicPower", db.connection)
+    df.columns = ['DateTimeUTC', 'MeanPower(KWh)']
+    df['MeanPower(KWh)'] = df['MeanPower(KWh)'].map(lambda x: int(x) / 1000)
+    print(df)
+    return df
+

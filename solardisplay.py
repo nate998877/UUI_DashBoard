@@ -48,11 +48,11 @@ def print_sunnyportal():
     print(resp)
 
 
-# methods currently only return values from today
+# methods currently only return values from today in kWh
 def main():
     print_enphase()
-    #print_solaredge()
-    #print_sunnyportal()
+    print_solaredge()
+    print_sunnyportal()
 
 
 if __name__ == '__main__':

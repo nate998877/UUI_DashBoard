@@ -1,10 +1,9 @@
-import requests
 import sqlite3
 import datetime
 import pytz
 
 
-#if database is empty causes error. DB needs to be initialized w/ data. This
+#if database is empty causes error. DB needs to be initialized w/ data. This is done automatically.
 class Enphase:
     def __init__(self):
         self.databasepath = "enphase.db"
