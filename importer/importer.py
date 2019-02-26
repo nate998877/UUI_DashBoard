@@ -8,8 +8,7 @@ import requests
 import datetime
 import pandas as pd
 import pytz
-import time
-import enphaseDB
+from importer import enphaseDB
 
 
 def convert_sunnyp_to_datetime(dt, sunnyp_date_str):
@@ -87,7 +86,7 @@ def get_SEdetails(api_base, param):
 
 
 # Methods call SolarEgde's (Ground) Array and returns API call depending on Method used
-def get_SEenergy(api_base, param,dt=None):
+def get_SEenergy(api_base, param, dt=None):
     #dt = datetime.datetime.now() if dt is None else dt
     resp = requests.get(api_base + '/energy', params=param)
     resp = dict(resp.json())
@@ -111,6 +110,8 @@ def enphase(response):
     database = enphaseDB.Enphase()
     database.create_database()
     values = enphaseDB.getvalues(response)
-    values[1] = database.tohour(values[1])
-    database.insert_database(values)
+    try:
+        values[1] = database.tohour(values[1])
+    except TypeError:
+        database.insert_database(values)
     database.printout()

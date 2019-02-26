@@ -1,16 +1,14 @@
+#!/home/nate/.conda/envs/cyberia/bin/python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue May  1 21:01:25 2018
 @author: nate9
 """
 
-
 import os
 import pprint
 import datetime
-import schedule
-import importer as impt
-
+from importer import importer as impt
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -21,7 +19,7 @@ def print_enphase():
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
     resp = impt.get_enphase(api_base, param)
     pp.pprint(resp)
-    return resp
+    impt.enphase(resp)
 
 
 def print_solaredgesiteinfo(date=datetime.date.today()):
@@ -52,11 +50,9 @@ def print_sunnyportal():
 
 # methods currently only return values from today
 def main():
-    print_solaredge()
+    print_enphase()
+    #print_solaredge()
     #print_sunnyportal()
-    response = print_enphase()
-    impt.enphase(response)
-    #schedule.every().hour.do(impt.database_updater(response))
 
 
 if __name__ == '__main__':
