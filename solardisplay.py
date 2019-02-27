@@ -11,6 +11,7 @@ import datetime
 from importer import importer as impt
 
 pp = pprint.PrettyPrinter(indent=4)
+SE = SP = EN = vars()
 
 
 def print_enphase():
@@ -19,7 +20,8 @@ def print_enphase():
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
     resp = impt.get_enphase(api_base, param)
     pp.pprint(resp)
-    impt.enphase(resp)
+    global EN
+    EN = impt.enphase(resp)
 
 
 def print_solaredgesiteinfo(date=datetime.date.today()):
@@ -39,21 +41,31 @@ def print_solaredge(date=datetime.date.today()):
     # Defaults to today
     param = {'api_key': os.getenv('SOLAREDGE_API_KEY'), 'timeUnit': 'HOUR', 'startDate': date, 'endDate': date}
     df = impt.get_SEenergy(api_base, param)
+    global SE
+    SE = df
     pp.pprint(df)
 
 
 def print_sunnyportal():
     print("SUNNYPORTAL --------------------------")
     resp = impt.get_sunnyportal()
+    global SP
+    SP = resp
     print(resp)
 
+
+def print_collective():
+    superpanda = impt.pandadance(SE, EN, SP)
+    pp.pprint(superpanda)
 
 # methods currently only return values from today in kWh
 def main():
     print_enphase()
     print_solaredge()
     print_sunnyportal()
+    print_collective()
 
 
 if __name__ == '__main__':
     main()
+

@@ -119,6 +119,7 @@ def enphase(response):
         database.insert_database(values)
     df = db_to_df(database)
     database.printout()
+    return df
 
 
 def db_to_df(db):
@@ -128,3 +129,12 @@ def db_to_df(db):
     print(df)
     return df
 
+
+def pandadance(solaredgedataframe, enphasedataframe, sunnyportaldataframe):
+    mergeddataframe = pd.DataFrame(columns=['DateTimeUTC', 'SunnyEdge(KWh)', 'Enphase(KWh)', 'SunnyPortal(KWh)'])
+    #mergeddataframe = pd.concat(solaredgedataframe,enphasedataframe,sunnyportaldataframe)
+    mergeddataframe['DateTimeUTC'] = solaredgedataframe['DateTimeUTC']
+    mergeddataframe['SunnyEdge(KWh)'] = solaredgedataframe['MeanPower(KWh)']
+    mergeddataframe[''] = enphasedataframe['MeanPower(KWh)']
+    mergeddataframe[''] = sunnyportaldataframe['MeanPower(KWh)']
+    return mergeddataframe
