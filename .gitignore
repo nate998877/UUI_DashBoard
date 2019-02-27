@@ -3,3 +3,4 @@ __pycache__/
 .idea/
 enphase.db
 .env
+*.code-workspace
