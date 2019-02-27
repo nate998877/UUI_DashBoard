@@ -11,11 +11,15 @@ import pprint
 import datetime
 import logging
 import logging.config
-import yaml
+import functools
+import time
 
+import yaml
+import schedule
 from importer import importer as impt
 
 pp = pprint.PrettyPrinter(indent=4)
+
 
 def config_logger():
     """Setup logging configuration"""
@@ -29,6 +33,23 @@ def config_logger():
 # Create module logger from config file
 logger = config_logger()
 
+
+def catch_exceptions(cancel_on_failure=False):
+    """decorator for handling exceptions"""
+    def catch_exceptions_decorator(job_func):
+        @functools.wraps(job_func)
+        def wrapper(*args, **kwargs):
+            try:
+                return job_func(*args, **kwargs)
+            except Exception:
+                logger.exception("UNHANDLED EXCEPTION")
+                if cancel_on_failure:
+                    return schedule.CancelJob
+        return wrapper
+    return catch_exceptions_decorator
+
+
+@catch_exceptions()
 def print_enphase():
     print("ENPHASE --------------------------")
     param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
@@ -48,6 +69,7 @@ def print_solaredgesiteinfo(date=datetime.date.today()):
     pp.pprint(resp)
 
 
+@catch_exceptions()
 def print_solaredge(date=datetime.date.today()):
     print("SUNNYEDGE --------------------------")
     site_id = os.getenv('SOLAREDGE_USER_ID')
@@ -58,6 +80,7 @@ def print_solaredge(date=datetime.date.today()):
     pp.pprint(df)
 
 
+@catch_exceptions()
 def print_sunnyportal():
     print("SUNNYPORTAL --------------------------")
     resp = impt.get_sunnyportal()
@@ -95,9 +118,14 @@ def main():
     # Indicate application startup in logs
     app_start_time = log_start_stop()
 
-    print_enphase()
-    print_solaredge()
-    print_sunnyportal()
+    schedule.every(1).minutes.do(print_enphase)
+    schedule.every(1).minutes.do(print_solaredge)
+    schedule.every(1).minutes.do(print_sunnyportal)
+    logger.info("3 periodic collection jobs are scheduled now ...")
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
     # Indicate app shutdown in logs
     log_start_stop(app_start_time)
