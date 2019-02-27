@@ -1,3 +1,4 @@
+!<img src="img/uui_array_install.jpg" width="400">
 # UUI Solar Data
 
 This project will enable data collection, aggregation, reporting & alerting, 
