@@ -4,3 +4,4 @@ __pycache__/
 enphase.db
 .env
 *.code-workspace
+*.log
