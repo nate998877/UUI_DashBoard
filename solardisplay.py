@@ -1,10 +1,8 @@
-#!/home/nate/.conda/envs/cyberia/bin/python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue May  1 21:01:25 2018
 @author: nate9
 """
-__author__ = 'nate9'
 
 import os
 import pprint
