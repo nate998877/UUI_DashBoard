@@ -11,12 +11,12 @@ import logging
 import logging.config
 import functools
 import time
-
 import yaml
 import schedule
-from importer import importer as impt
-
-pp = pprint.PrettyPrinter(indent=4)
+from dotenv import load_dotenv
+from modules.Enphase import Enphase
+from modules.SolarEdge import SolarEdge
+from modules.SunnyPortal import SunnyPortal
 
 
 def config_logger():
@@ -30,6 +30,9 @@ def config_logger():
 
 # Create module logger from config file
 logger = config_logger()
+
+load_dotenv()
+pp = pprint.PrettyPrinter(indent=4)
 
 
 def catch_exceptions(cancel_on_failure=False):
@@ -50,11 +53,18 @@ def catch_exceptions(cancel_on_failure=False):
 @catch_exceptions()
 def print_enphase():
     print("ENPHASE --------------------------")
-    param = {'key': os.getenv('ENPHASE_API_KEY'), 'user_id': os.getenv('ENPHASE_USER_ID')}
+    api_key = os.environ['ENPHASE_API_KEY']
+    user_id = os.environ['ENPHASE_USER_ID']
+    enphaseSystem = Enphase(api_key, user_id)
+    pp.pprint(enphaseSystem)
+    enphaseSystem.initDB(enphaseSystem)
+
+    param = {'key': os.getenv('ENPHASE_API_KEY'),
+             'user_id': os.getenv('ENPHASE_USER_ID')}
     api_base = 'https://api.enphaseenergy.com/api/v2/systems'
-    resp = impt.get_enphase(api_base, param)
+    resp = Enphase.get_enphase(api_base, param)
     pp.pprint(resp)
-    impt.enphase(resp)
+    Enphase.enphase(resp)
 
 
 def print_solaredgesiteinfo(date=datetime.date.today()):
@@ -62,26 +72,28 @@ def print_solaredgesiteinfo(date=datetime.date.today()):
     site_id = os.getenv('SOLAREDGE_USER_ID')
     api_base = 'https://monitoringapi.solaredge.com/site/{}'.format(site_id)
     # Defaults to today
-    param = {'api_key': os.getenv('SOLAREDGE_API_KEY'), 'startDate': date, 'endDate': date}
-    resp = impt.get_SEdetails(api_base, param)
+    param = {'api_key': os.getenv(
+        'SOLAREDGE_API_KEY'), 'startDate': date, 'endDate': date}
+    resp = SolarEdge.get_SEdetails(api_base, param)
     pp.pprint(resp)
 
 
 @catch_exceptions()
 def print_solaredge(date=datetime.date.today()):
-    print("SUNNYEDGE --------------------------")
-    site_id = os.getenv('SOLAREDGE_USER_ID')
-    api_base = 'https://monitoringapi.solaredge.com/site/{}'.format(site_id)
-    # Defaults to today
-    param = {'api_key': os.getenv('SOLAREDGE_API_KEY'), 'timeUnit': 'HOUR', 'startDate': date, 'endDate': date}
-    df = impt.get_SEenergy(api_base, param)
-    pp.pprint(df)
+  print("SOLAREDGE --------------------------")
+  site_id = os.getenv('SOLAREDGE_USER_ID')
+  api_base = 'https://monitoringapi.solaredge.com/site/{}'.format(site_id)
+  # Defaults to today
+  param = {'api_key': os.getenv(
+    'SOLAREDGE_API_KEY'), 'timeUnit': 'HOUR', 'startDate': date, 'endDate': date}
+  df = SolarEdge.get_SEenergy(api_base, param)
+  pp.pprint(df)
 
 
 @catch_exceptions()
 def print_sunnyportal():
     print("SUNNYPORTAL --------------------------")
-    resp = impt.get_sunnyportal()
+    resp = SunnyPortal.get_sunnyportal()
     print(resp)
 
 
@@ -110,9 +122,11 @@ def log_start_stop(start_dt=None):
         logger.info(fmt % str(uptime))
     return start_dt
 
+
 # methods currently only return values from today in kWh
 def main():
-    
+    # print_sunnyportal()
+    print_enphase()
     # Indicate application startup in logs
     app_start_time = log_start_stop()
 

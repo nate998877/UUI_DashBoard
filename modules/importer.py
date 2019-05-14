@@ -7,8 +7,9 @@ import os
 import requests
 import datetime
 import pandas as pd
+from modules.enphaseDB import Enphase, hourlypower, getvalues
+from bs4 import BeautifulSoup as bs
 import pytz
-from importer import enphaseDB
 
 
 def convert_sunnyp_to_datetime(dt, sunnyp_date_str):
@@ -20,6 +21,7 @@ def convert_sunnyp_to_datetime(dt, sunnyp_date_str):
     :param sunnyp_date_str: Sunny Portal timestamp string e.g. '2:00 PM/ 13'
     :return: A datetime object that combines both values, and is EST timezone-aware.
     """
+
     dt_before = dt - datetime.timedelta(days=1)
     dt_after = dt + datetime.timedelta(days=1)
     d = sunnyp_date_str.split('/')
@@ -59,7 +61,10 @@ def get_sunnyportal(dt=None):
         r = s.get(url, params=params)
 
     # parse the returned html into pandas dataframe
-    if r is not None:
+    if r.text is not None:
+        if sunnyPortalDataCheck(r.text) == -1:
+            return
+        #<li>SB 5000US 400 Total yield: Raw data for the display period is not available.<br/>Raw data available until  4/3/2019 11:35:31 AM.</li>
         data = pd.read_html(r.text)
         # select only the first two columns: Timestamp and Mean Power [KWh]
         df = data[0][[0, 1]]
@@ -77,6 +82,14 @@ def get_sunnyportal(dt=None):
         df.set_index('DateTimeUTC')
         # NOTE that Mean Power still contains NaN values
         return df
+
+def sunnyPortalDataCheck(html):
+    prettyHtml = bs(html, features="lxml")
+    liTag = prettyHtml.find('li')
+    status, _, date = liTag.contents
+    if status.find("Raw data for the display period is not availt available."):
+        return -1
+
 
 
 # Methods call SolarEgde's (Ground) Array and returns API call depending on Method used
@@ -126,8 +139,10 @@ def db_to_df(db):
     df = pd.read_sql_query("SELECT * FROM historicPower", db.connection)
     df.columns = ['DateTimeUTC', 'MeanPower(KWh)']
     df['MeanPower(KWh)'] = df['MeanPower(KWh)'].map(lambda x: int(x) / 1000)
-    print(df)
     return df
+
+
+
 
 
 def pandadance(solaredgedataframe, enphasedataframe, sunnyportaldataframe):
