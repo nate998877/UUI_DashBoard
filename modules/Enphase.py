@@ -1,10 +1,14 @@
 import requests
+import sqlite3
+import datetime
+import pytz
 from modules.APIInterface import APIInterface
 
 
 class Enphase(APIInterface):
   def __init__(self, api_key, user_id):
     super().__init__('https://api.enphaseenergy.com/api/v2/systems', api_key, user_id)
+    self.database = EnphaseDB()
 
   def get_rawdata(self):
     """
@@ -12,7 +16,7 @@ class Enphase(APIInterface):
     TODO add ability to fetch different days
     """
     params={
-        'key': self.apikey,
+        'key': self.api_key,
         'user_id': self.user_id
       }
     system_id_request = requests.get(self.api_base, params=params)
@@ -20,37 +24,6 @@ class Enphase(APIInterface):
     system_id = parsedJson['systems'][1]['system_id']
     self.rawData = requests.get('{0}/{1}/summary'.format(self.api_base, system_id), params=params)
     return dict(self.rawData.json())
-
-  def queryDB(self):
-    db = EnphaseDB()
-    return db.call_last()
-
-  def initDB(self, response):
-    db = EnphaseDB()
-    db.create_database()
-    values = db.getvalues(response)
-    try:
-      values[1] = db.tohour(values[1])
-    except TypeError:
-      db.insert_database(values)
-    df = EnphaseDB.db_to_df(db)
-    db.printout()
-    return df
-
-  def enphase(response):
-	database = enphaseDB.Enphase()
-	database.create_database()
-	values = enphaseDB.getvalues(response)
-	try:
-		values[1] = database.tohour(values[1])
-	except TypeError:
-		database.insert_database(values)
-	df = db_to_df(database)
-	database.printout()
-	return df
-
-
-
 
 
 # Method calls Enphase's (Cottage Rooftop) Array and returns a summary of the system
@@ -87,9 +60,7 @@ def db_to_df(db):
 	return df
 
 
-import sqlite3
-import datetime
-import pytz
+
 
 
 #if database is empty causes error. DB needs to be initialized w/ data. This is done automatically.
