@@ -16,7 +16,7 @@ import schedule
 from dotenv import load_dotenv
 from modules import SolarEdge
 from modules import Enphase
-from modules import SunnyPortal
+from modules.SunnyPortal import SunnyPortal
 
 
 
@@ -51,14 +51,19 @@ def catch_exceptions(cancel_on_failure=False):
     return catch_exceptions_decorator
 
 
+#{systemName}system is currently a misnomer for all prints! 
+#TODO convert classes to full system access instead of single value access
+#most of these only acccess power value - longterm goal to access all data/api points
+
+
 @catch_exceptions()
 def print_enphase():
   print("ENPHASE --------------------------")
   api_key = os.environ['ENPHASE_API_KEY']
   user_id = os.environ['ENPHASE_USER_ID']
   enphaseSystem = Enphase.Enphase(api_key, user_id)
+  pp.pprint(enphaseSystem.get_systemsummary())
   pp.pprint(enphaseSystem.get_rawdata())
-  print(enphaseSystem.database)
 
 
 @catch_exceptions()
@@ -73,12 +78,11 @@ def print_solaredge():
 
 @catch_exceptions()
 def print_sunnyportal():
-    print("SUNNYPORTAL --------------------------")
-    api_key = os.environ['SUNNY_PASS']
-    user_id = os.environ['SUNNY_USER']
-    SunnyPortal = SunnyPortal()
-    resp = SunnyPortal.get_sunnyportal()
-    print(resp)
+  print("SUNNYPORTAL --------------------------")
+  api_key = os.environ['SUNNY_PASS']
+  user_id = os.environ['SUNNY_USER']
+  sunnyPortalSystem = SunnyPortal(api_key, user_id)
+  pp.pprint(sunnyPortalSystem.get_rawdata())
 
 
 def log_start_stop(start_dt=None):

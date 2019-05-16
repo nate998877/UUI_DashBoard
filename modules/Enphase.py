@@ -2,6 +2,7 @@ import requests
 import sqlite3
 import datetime
 import pytz
+import pandas as pd
 from modules.APIInterface import APIInterface
 
 
@@ -10,7 +11,7 @@ class Enphase(APIInterface):
     super().__init__('https://api.enphaseenergy.com/api/v2/systems', api_key, user_id)
     self.database = EnphaseDB()
 
-  def get_rawdata(self):
+  def get_systemsummary(self):
     """
     Fetches today's raw data
     TODO add ability to fetch different days
@@ -24,46 +25,44 @@ class Enphase(APIInterface):
     system_id = parsedJson['systems'][1]['system_id']
     self.rawData = requests.get('{0}/{1}/summary'.format(self.api_base, system_id), params=params)
     return dict(self.rawData.json())
-
+  
 
 # Method calls Enphase's (Cottage Rooftop) Array and returns a summary of the system
-def get_enphase(api_base, param):
-	resp = requests.get(api_base, params=param)
-	d = dict(resp.json())
-	system_id = d['systems'][1]['system_id']
-	resp = requests.get(
-		'{0}/{1}/summary'.format(api_base, system_id), params=param)
-	return dict(resp.json())
+  def get_rawdata(self):
+    params={
+      'key': self.api_key,
+      'user_id': self.user_id
+    }
+    resp = requests.get(self.api_base, params=params)
+    d = dict(resp.json())
+    system_id = d['systems'][1]['system_id']
+    resp = requests.get(
+      '{0}/{1}/summary'.format(self.api_base, system_id), params=params)
+    return dict(resp.json())
 
-# values are datetime and generation
-
-
-def enphase(response):
-	database = enphaseDB.Enphase()
-	database.create_database()
-	values = enphaseDB.getvalues(response)
-
-	try:
-		values[1] = database.tohour(values[1])
-	except TypeError:
-		database.insert_database(values)
-	df = db_to_df(database)
-	database.printout()
-	return df
-
+  def databaseInterface(self, response):
+  	database = self.database.Enphase()
+  	database.create_database()
+  	values = self.enphaseDB.getvalues(response)
+  	try:
+  		values[1] = database.tohour(values[1])
+  	except TypeError:
+  		database.insert_database(values)
+  	df = db_to_df(database)
+  	database.printout()
+  	return df
 
 # send to pandapandapanda to be converted to panda
-def db_to_df(db):
-	df = pd.read_sql_query("SELECT * FROM historicPower", db.connection)
-	df.columns = ['DateTimeUTC', 'MeanPower(KWh)']
-	df['MeanPower(KWh)'] = df['MeanPower(KWh)'].map(lambda x: int(x) / 1000)
-	return df
-
-
+  def db_to_df(self, db):
+  	df = pd.read_sql_query("SELECT * FROM historicPower", db.connection)
+  	df.columns = ['DateTimeUTC', 'MeanPower(KWh)']
+  	df['MeanPower(KWh)'] = df['MeanPower(KWh)'].map(lambda x: int(x) / 1000)
+  	return df
 
 
 
 #if database is empty causes error. DB needs to be initialized w/ data. This is done automatically.
+#TODO make database more verbose when there are interupts
 class EnphaseDB:
   def __init__(self):
     self.databasepath = "enphase.db"

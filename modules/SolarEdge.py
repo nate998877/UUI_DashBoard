@@ -8,7 +8,6 @@ from modules.APIInterface import APIInterface
 class SolarEgde(APIInterface):
   def __init__(self, api_key, user_id):
     super().__init__('https://monitoringapi.solaredge.com/site/{}'.format(os.environ['SOLAREDGE_USER_ID']), api_key, user_id)
-  
 
   def get_rawdata(self):
     date = datetime.date.today()
@@ -20,7 +19,6 @@ class SolarEgde(APIInterface):
     df['DateTimeUTC'] = df['DateTimeUTC'].map(lambda x: x + "+00:00")
     df['MeanPower(KWh)'] = df['MeanPower(KWh)'].map(lambda x: x / 1000)
     return df
-
 
   #this goes unused for now
   def get_sitedata(self):
