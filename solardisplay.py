@@ -13,6 +13,9 @@ import functools
 import time
 import yaml
 import schedule
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
 from dotenv import load_dotenv
 from modules import SolarEdge
 from modules import Enphase
@@ -61,8 +64,7 @@ def print_enphase():
     api_key = os.environ['ENPHASE_API_KEY']
     user_id = os.environ['ENPHASE_USER_ID']
     enphaseSystem = Enphase.Enphase(api_key, user_id)
-    pp.pprint(enphaseSystem.get_systemsummary())
-    pp.pprint(enphaseSystem.get_rawdata())
+    pp.pprint(enphaseSystem.main())
 
 
 @catch_exceptions()
@@ -109,27 +111,34 @@ def log_start_stop(start_dt=None):
     return start_dt
 
 
+def display_dash(system_data):
+    # app = dash.Dash()
+    # app.layout = html.Div(children=[html.H1("This is the solar data huzza"),
+    #                                 lambda x: dcc.Graph(id="test",
+    #                                 figure=))
+    # app.run_server(debug=True)
+
 # methods currently only return values from today in kWh
 def main():
-    # print_sunnyportal()
-    print_enphase()
-    print_solaredge()
-    print_sunnyportal()
-    # Indicate application startup in logs
-    app_start_time = log_start_stop()
+    enp_data = print_enphase()
+    sol_data = print_solaredge()
+    sun_data = print_sunnyportal()
+    display_dash([enp_data, sol_data, sun_data])
+    # # Indicate application startup in logs
+    # app_start_time = log_start_stop()
 
-    schedule.every(1).minutes.do(print_enphase)
-    schedule.every(1).minutes.do(print_solaredge)
-    schedule.every(1).minutes.do(print_sunnyportal)
-    logger.info("3 periodic collection jobs are scheduled now ...")
+    # schedule.every(1).minutes.do(print_enphase)
+    # schedule.every(1).minutes.do(print_solaredge)
+    # schedule.every(1).minutes.do(print_sunnyportal)
+    # logger.info("3 periodic collection jobs are scheduled now ...")
 
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
 
-    # Indicate app shutdown in logs
-    log_start_stop(app_start_time)
-    logging.shutdown()
+    # # Indicate app shutdown in logs
+    # log_start_stop(app_start_time)
+    # logging.shutdown()
 
 
 if __name__ == '__main__':

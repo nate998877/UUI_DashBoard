@@ -88,6 +88,7 @@ class SunnyPortal(APIInterface):
         """
         prettyHtml = bs(html, features="lxml")
         liTag = prettyHtml.find('li')
-        status, _, date = liTag.contents
-        if status.find("Raw data for the display period is not availt available."):
-            return -1
+        if(liTag):
+            status, _, date = liTag.contents
+            if status.find("Raw data for the display period is not availt available."):
+                return -1

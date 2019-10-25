@@ -26,6 +26,9 @@ pyyaml = "*"
 schedule = "*"
 python-dotenv = "*"
 bs4 = "*"
+dash = "*"
+dash-html-components = "*"
+dash-core-components = "*"
 
 [requires]
 python_version = "3.6"
